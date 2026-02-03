@@ -161,7 +161,11 @@ class ServiceContainer {
         // ? Register event handlers
         queue.on<GenerateMockPayloadJobParams>(
             'completed',
-            createGenerationRequestCompleteHandler(queue)
+            createGenerationRequestCompleteHandler(
+                queue,
+                this._workbenchCacheService!,
+                this._mockRunnerConfigCache!
+            )
         );
         queue.on<GenerateMockPayloadJobParams>(
             'failed',
