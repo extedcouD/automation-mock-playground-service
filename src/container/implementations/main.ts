@@ -21,7 +21,7 @@ export function InitMainContainer() {
             return delay;
         },
     });
-
+    logger.info('Redis client for DB 0 initialized');
     // Redis DB 1 - config cache
     const redis1Client = new Redis({
         host: process.env.REDIS_HOST || 'localhost',
@@ -34,6 +34,7 @@ export function InitMainContainer() {
             return delay;
         },
     });
+    logger.info('Redis client for DB 1 initialized');
 
     const redis0Service = createRedisCacheService(redis0Client);
     const redis1Service = createRedisCacheService(redis1Client);
@@ -43,4 +44,5 @@ export function InitMainContainer() {
 
     const queue = createInMemoryQueue();
     container.setQueueService(queue);
+    logger.info('Main container initialized successfully');
 }

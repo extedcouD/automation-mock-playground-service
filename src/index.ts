@@ -1,11 +1,15 @@
-import config from './config/server-config';
-import createServer from './server';
-import logger from './utils/logger';
 import validateEnv from './env';
 import { InitMainContainer } from './container/implementations/main';
+import config from './config/server-config';
 
+// Initialize environment and container FIRST, before any imports that use them
 validateEnv();
 InitMainContainer();
+
+// Now safe to import server which imports routes
+import createServer from './server';
+import logger from './utils/logger';
+
 const app = createServer();
 
 const server = app.listen(config.port, async () => {

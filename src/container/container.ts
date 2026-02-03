@@ -1,7 +1,6 @@
 import { ICacheService } from '../cache/cache-interface';
 import { IQueueService } from '../queue/IQueueService';
 import { createCache } from '../cache/cache-factory';
-import { createInMemoryQueue } from '../queue/InMemoryQueue';
 import {
     WorkbenchCacheService,
     WorkbenchCacheServiceType,
@@ -101,7 +100,7 @@ class ServiceContainer {
      */
     public getQueueService(): IQueueService {
         if (!this._queueService) {
-            this._queueService = this.initializeQueueService();
+            throw new Error('QueueService not initialized');
         }
         return this._queueService;
     }
@@ -126,6 +125,7 @@ class ServiceContainer {
      */
     public setQueueService(service: IQueueService): void {
         this._queueService = service;
+        this.initializeQueueService();
     }
 
     /**
@@ -143,7 +143,10 @@ class ServiceContainer {
      * Initialize queue service with processors and event handlers
      */
     private initializeQueueService(): IQueueService {
-        const queue = createInMemoryQueue();
+        const queue = this._queueService;
+        if (!queue) {
+            throw new Error('QueueService not initialized');
+        }
         if (!this._mockRunnerConfigCache) {
             throw new Error('MockRunnerConfigCache not initialized');
         }
