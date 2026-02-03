@@ -8,6 +8,8 @@ import {
     ApiServiceRequestJobParams,
     SEND_TO_API_SERVICE_JOB,
 } from './api-service-request';
+import { WorkbenchCacheServiceType } from '../cache/workbench-cache';
+import { getSaveDataConfig } from '../../utils/runner-utils';
 
 export const GENERATE_PAYLOAD_JOB = 'GENERATE_PAYLOAD_JOB';
 
@@ -64,7 +66,11 @@ export function generateRequestPayloadJobFailed(
         error
     );
 }
-export function createGenerationRequestCompleteHandler(queue: IQueueService) {
+export function createGenerationRequestCompleteHandler(
+    queue: IQueueService,
+    workbenchCache: WorkbenchCacheServiceType,
+    mockRunnerCache: MockRunnerConfigCache
+) {
     return async (
         job: QueueJob<GenerateMockPayloadJobParams>,
         result?: unknown
@@ -84,6 +90,21 @@ export function createGenerationRequestCompleteHandler(queue: IQueueService) {
                     job.data.flowContext.transactionData.sessionId ?? '',
             },
         };
+        const mockRunnerConfig = await mockRunnerCache.getMockRunnerConfig(
+            job.data.flowContext.domain,
+            job.data.flowContext.version,
+            job.data.flowContext.flowId
+        );
+        const saveDataConfig = getSaveDataConfig(
+            mockRunnerConfig,
+            job.data.actionMeta.actionId
+        );
+        await workbenchCache
+            .TxnBusinessCacheService()
+            .saveMockSessionData(job.data.flowContext.transactionId, payload, {
+                'save-data': saveDataConfig,
+            });
+
         const id = await queue.enqueue(SEND_TO_API_SERVICE_JOB, params);
         logger.info('Enqueued API service request job', { jobId: id });
     };

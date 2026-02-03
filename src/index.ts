@@ -2,8 +2,10 @@ import config from './config/server-config';
 import createServer from './server';
 import logger from './utils/logger';
 import validateEnv from './env';
+import { InitMainContainer } from './container/implementations/main';
 
 validateEnv();
+InitMainContainer();
 const app = createServer();
 
 const server = app.listen(config.port, async () => {

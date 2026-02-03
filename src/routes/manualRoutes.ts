@@ -2,6 +2,7 @@ import { Router, Request } from 'express';
 import { FlowContext } from '../types/process-flow-types';
 import ServiceContainer from '../container/container';
 import { flowControllers } from '../controllers/flow-controller';
+import { incomingRequestControllers } from '../controllers/incoming-request-controller';
 
 const manualRouter = Router();
 
@@ -16,6 +17,16 @@ const flowControllersInstance = flowControllers(
     container.getWorkbenchCacheService()
 );
 
-manualRouter.post('/:action', flowControllersInstance.actUponFlow);
+const incomingControllers = incomingRequestControllers(
+    container.getWorkbenchCacheService(),
+    container.getMockRunnerConfigCache(),
+    container.getQueueService()
+);
+
+manualRouter.post(
+    '/:action',
+    incomingControllers.validateAndSaveIncomingRequest,
+    flowControllersInstance.actUponFlow
+);
 
 export default manualRouter;

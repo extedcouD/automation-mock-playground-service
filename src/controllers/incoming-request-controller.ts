@@ -20,6 +20,7 @@ import {
     SEND_TO_API_SERVICE_JOB,
 } from '../service/jobs/api-service-request';
 import { sendAck } from '../utils/res-utils';
+import { getSaveDataConfig } from '../utils/runner-utils';
 
 export function incomingRequestControllers(
     workbenchCache: WorkbenchCacheServiceType,
@@ -77,7 +78,8 @@ export function incomingRequestControllers(
                     req,
                     ctx,
                     queue,
-                    mockRunnerCache
+                    mockRunnerCache,
+                    workbenchCache
                 );
 
                 if (processRequest?.shouldRespond === false) {
@@ -139,7 +141,8 @@ async function processMatchingRequest(
     req: ApiRequest,
     ctx: FlowContext,
     queue: IQueueService,
-    mockRunnerCache: MockRunnerConfigCache
+    mockRunnerCache: MockRunnerConfigCache,
+    workbenchCache: WorkbenchCacheServiceType
 ) {
     const { step, index } = matchingStep;
     logger.info(
@@ -179,6 +182,13 @@ async function processMatchingRequest(
             );
             return { shouldRespond: false };
         }
+        const saveDataConfig = getSaveDataConfig(runnerConfig, step.actionId);
+        await workbenchCache
+            .TxnBusinessCacheService()
+            .saveMockSessionData(ctx.transactionId, body, {
+                'save-data': saveDataConfig,
+            });
+        return { shouldRespond: false };
     } catch (error) {
         logger.error(
             'Error while validating and saving ' + step.actionId,

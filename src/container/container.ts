@@ -82,6 +82,21 @@ class ServiceContainer {
     }
 
     /**
+     * Get the mock runner config cache instance (lazy initialization)
+     */
+    public getMockRunnerConfigCache(): MockRunnerConfigCache {
+        if (!this._mockRunnerConfigCache) {
+            if (!this._cacheService1) {
+                throw new Error('CacheService1 not initialized');
+            }
+            this._mockRunnerConfigCache = newMockRunnerConfigCache(
+                this._cacheService1
+            );
+        }
+        return this._mockRunnerConfigCache;
+    }
+
+    /**
      * Get the queue service instance (lazy initialization)
      */
     public getQueueService(): IQueueService {
@@ -101,7 +116,9 @@ class ServiceContainer {
 
     public setCacheService1(service: ICacheService): void {
         this._cacheService1 = service;
-        this._mockRunnerConfigCache = newMockRunnerConfigCache(service);
+        this._mockRunnerConfigCache = newMockRunnerConfigCache(
+            this._cacheService1
+        );
     }
 
     /**
@@ -116,8 +133,10 @@ class ServiceContainer {
      */
     public reset(): void {
         this._cacheService0 = null;
+        this._cacheService1 = null;
         this._queueService = null;
         this._workbenchCacheService = null;
+        this._mockRunnerConfigCache = null;
     }
 
     /**

@@ -3,7 +3,7 @@ import Redis from 'ioredis';
 import { z } from 'zod';
 import logger from '../utils/logger';
 
-export function createCacheService(redisClient: Redis): ICacheService {
+export function createRedisCacheService(redisClient: Redis): ICacheService {
     return {
         async get<T>(key: string, schema: z.ZodType<T>): Promise<T | null> {
             try {
